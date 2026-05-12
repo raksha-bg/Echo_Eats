@@ -38,20 +38,38 @@ const VoiceAssistant = () => {
 
     switch (command) {
       case 'NAVIGATE':
-        if (page) navigate(page === 'home' ? '/' : `/${page}`);
+        if (page === 'checkout') {
+          navigate('/cart#payment-modal');
+        } else if (page === 'menu' || page === 'items') {
+          navigate('/#items');
+        } else if (page) {
+          navigate(page === 'home' ? '/' : `/${page}`);
+        }
         break;
 
       case 'ORDER':
         if (item_id) {
-          const item = foodData.find(f => f.FoodID === item_id);
+          const item = foodData.find(f => f.FoodID === parseInt(item_id));
           if (item) {
-            await updateQuantity(item_id, quantity || 1);
+            await updateQuantity(item.FoodID, quantity || 1);
             setStatusMessage(`Added ${quantity || 1} ${item.FoodName} to cart`);
             setTimeout(() => setStatusMessage(''), 3000);
           } else {
             const errorMsg = 'Item not found in our menu.';
             setAssistantResponse(errorMsg);
             speakResponse(errorMsg);
+          }
+        }
+        break;
+
+      case 'REMOVE':
+        if (item_id) {
+          const item = foodData.find(f => f.FoodID === parseInt(item_id));
+          if (item && item.Quantity > 0) {
+            const removeQty = Math.min(item.Quantity, quantity || 1);
+            await updateQuantity(item.FoodID, -removeQty);
+            setStatusMessage(`Removed ${removeQty} ${item.FoodName} from cart`);
+            setTimeout(() => setStatusMessage(''), 3000);
           }
         }
         break;
