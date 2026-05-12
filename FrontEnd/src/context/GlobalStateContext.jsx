@@ -1,6 +1,9 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { auth } from '../firebase'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+
 export const GlobalStateContext = createContext()
 
 export const GlobalStateProvider = ({ children }) => {
@@ -33,8 +36,9 @@ export const GlobalStateProvider = ({ children }) => {
     }
   }, [syncCartState])
 
-  // ── Session ID + user restore + initial data fetch (runs once) ─────────────
+  // ── Firebase Auth Listener + Session Setup ──────────────────────────────────
   useEffect(() => {
+    // 1. Session ID setup
     let sid = localStorage.getItem('sessionId')
     if (!sid) {
       sid = 'session_' + Math.random().toString(36).substr(2, 9)
@@ -42,15 +46,29 @@ export const GlobalStateProvider = ({ children }) => {
     }
     setSessionId(sid)
 
-    const savedUser = localStorage.getItem('user')
-    const savedLoginState = localStorage.getItem('isLoggedIn')
-    if (savedUser && savedLoginState === 'true') {
-      setUser(JSON.parse(savedUser))
-      setIsLoggedIn(true)
-    }
+    // 2. Firebase Auth listener
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const userData = {
+          user_id: firebaseUser.uid,
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          email: firebaseUser.email
+        }
+        setUser(userData)
+        setIsLoggedIn(true)
+        localStorage.setItem('user', JSON.stringify(userData))
+        localStorage.setItem('isLoggedIn', 'true')
+      } else {
+        setUser(null)
+        setIsLoggedIn(false)
+        localStorage.removeItem('user')
+        localStorage.setItem('isLoggedIn', 'false')
+      }
+      setLoading(false)
+      fetchFoodData()
+    })
 
-    setLoading(false)
-    fetchFoodData()           // single fetch — no interval
+    return () => unsubscribe()
   }, [fetchFoodData])
 
   // ── Update quantity — optimistic local update, one API call ─────────────────
@@ -163,22 +181,18 @@ export const GlobalStateProvider = ({ children }) => {
 
   // ── Logout ──────────────────────────────────────────────────────────────────
   const logout = useCallback(async () => {
-    if (!user) return
-
-    await clearCart()
-
     try {
-      await fetch(`/api/logout/${user.user_id}/`, { method: 'POST' })
+      await signOut(auth)
+      await clearCart()
+      localStorage.removeItem('user')
+      localStorage.removeItem('isLoggedIn')
+      setUser(null)
+      setIsLoggedIn(false)
+      navigate('/')
     } catch (error) {
       console.error('Logout error:', error)
     }
-
-    localStorage.removeItem('user')
-    localStorage.removeItem('isLoggedIn')
-    setUser(null)
-    setIsLoggedIn(false)
-    navigate('/')
-  }, [user, clearCart, navigate])
+  }, [clearCart, navigate])
 
   const value = {
     Quantity, setQuantity,

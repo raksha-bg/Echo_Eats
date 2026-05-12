@@ -76,10 +76,11 @@ def init_db():
         ]
         cursor.executemany('INSERT INTO FoodItems (FoodName, Price, Category, Quantity, ImageName) VALUES (?, ?, ?, ?, ?)', sample_foods)
 
-    # Insert a sample user if empty
+    # Insert sample users if empty
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
         cursor.execute('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', ('Test User', 'test@example.com', 'password123'))
+        cursor.execute('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', ('Raksha', 'raksha@gmail.com', 'raksha123'))
 
     conn.commit()
     conn.close()

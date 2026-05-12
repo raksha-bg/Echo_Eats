@@ -81,19 +81,12 @@ const VoiceAssistant = () => {
 
   const handleLogin = async (email, password) => {
     try {
-      const res = await fetch('/api/login/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        login(data.user);
-        speakResponse('Login successful. How can I help you?');
-      } else {
-        speakResponse('Login failed. Please try again.');
-      }
-    } catch {
+      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      const { auth } = await import('../firebase');
+      await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password.trim());
+      speakResponse('Login successful. How can I help you?');
+    } catch (error) {
+      console.error("Voice login error:", error);
       speakResponse('Login failed. Please try again.');
     } finally {
       setLoginStep(null);
