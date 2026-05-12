@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime';
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 import {createBrowserRouter, RouterProvider} from 'react-router-dom'

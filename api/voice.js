@@ -1,13 +1,28 @@
 const OpenAI = require('openai');
 
 module.exports = async (req, res) => {
+  // Add CORS headers for production
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     const { transcript } = req.body;
+    
+    // IMPORTANT: User needs to set this in Vercel Dashboard
     const groqApiKey = process.env.GROQ_API_KEY || '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';
+
+    if (!transcript) {
+       return res.status(400).json({ error: 'No transcript provided' });
+    }
 
     const openai = new OpenAI({
       apiKey: groqApiKey,
@@ -41,19 +56,25 @@ module.exports = async (req, res) => {
           content: transcript
         }
       ],
-      temperature: 0.1, // Keep it deterministic
+      temperature: 0.1,
       response_format: { type: "json_object" }
     });
 
     const aiResponse = JSON.parse(completion.choices[0].message.content);
 
     return res.status(200).json({
-      status: "Received ✅",
-      transcript,
+      status: "success",
       aiResponse
     });
   } catch (error) {
     console.error("Voice processing error:", error);
-    return res.status(500).json({ error: 'Failed to process voice command', details: error.message });
+    // Return a friendly fallback instead of a crash
+    return res.status(200).json({ 
+      status: "fallback", 
+      aiResponse: {
+        response: "I'm sorry, I'm having trouble thinking right now. Please try again.",
+        command: "NONE"
+      }
+    });
   }
 };
