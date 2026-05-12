@@ -13,8 +13,10 @@ from datetime import datetime
 
 
 
-RAZORPAY_KEY_ID ='rzp_test_SdTWYyzys8e6Zq'
-RAZORPAY_KEY_SECRET = 'SsjpBTteSJl17Va53IFlk2sC'
+import os
+
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_SdTWYyzys8e6Zq')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'SsjpBTteSJl17Va53IFlk2sC')
 
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
@@ -43,7 +45,7 @@ def process_voice(request):
             print("User said:", transcript)
             
             openai_client = OpenAI(
-                api_key='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',
+                api_key=os.environ.get('GROQ_API_KEY', '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'),
                 base_url="https://api.groq.com/openai/v1",
             )
             
