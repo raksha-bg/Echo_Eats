@@ -31,6 +31,13 @@ export const GlobalStateProvider = ({ children }) => {
     { FoodID: 11, FoodName: 'Vangi Bath', Price: 79, Category: 'Main Course', Quantity: 0, ImageName: '11_VangiBath.jpeg' },
   ]
 
+  // ── Derive cart totals from foodData instead of maintaining separate state ──
+  const syncCartState = useCallback((data) => {
+    const total = data.reduce((sum, item) => sum + (item.Quantity || 0), 0)
+    setQuantity(total)
+    setDisplayCart(total > 0)
+  }, [])
+
   // ── Fetch food items ──────────────────────────────────────────────────────────
   const fetchFoodData = useCallback(async () => {
     // If not logged in, don't show any food items (as requested)
