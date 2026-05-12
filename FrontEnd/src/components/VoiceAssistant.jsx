@@ -164,7 +164,7 @@ const VoiceAssistant = () => {
   const processVoiceCommand = useCallback(async (command) => {
     setIsProcessing(true);
     try {
-      const res = await fetch('/api/voice/', {
+      const res = await fetch('/voice/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcript: command }),

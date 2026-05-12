@@ -61,7 +61,7 @@ const CartPage = () => {
         setLoading(true)
 
         try {
-            const orderResponse = await fetch("/api/create-order/", {
+            const orderResponse = await fetch("/create-order/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ const CartPage = () => {
     setLoading(true)
 
     try {
-        const orderResponse = await fetch("/api/create-order/", {
+        const orderResponse = await fetch("/create-order/", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ const CartPage = () => {
             order_id: orderData.razorpayOrderId,
             handler: async (response) => {
                 try {
-                    const verifyResponse = await fetch("/api/verify-payment/", {
+                    const verifyResponse = await fetch("/verify-payment/", {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

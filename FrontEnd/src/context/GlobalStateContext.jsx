@@ -27,7 +27,7 @@ export const GlobalStateProvider = ({ children }) => {
   // ── Fetch food items once on mount ──────────────────────────────────────────
   const fetchFoodData = useCallback(async () => {
     try {
-      const res = await fetch('/api/')
+      const res = await fetch('/')
       const data = await res.json()
       setFoodData(data)
       syncCartState(data)
@@ -88,7 +88,7 @@ export const GlobalStateProvider = ({ children }) => {
       let response
 
       if (isLoggedIn && user) {
-        response = await fetch(`/api/update-quantity/${foodId}/`, {
+        response = await fetch(`/update-quantity/${foodId}/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ quantity: delta }),
@@ -99,7 +99,7 @@ export const GlobalStateProvider = ({ children }) => {
         const currentQty = currentItem?.Quantity || 0
         const newQuantity = Math.max(0, currentQty + delta)
 
-        response = await fetch('/api/session-cart/', {
+        response = await fetch('/session-cart/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId, foodId, quantity: newQuantity }),
@@ -123,14 +123,14 @@ export const GlobalStateProvider = ({ children }) => {
       if (isLoggedIn && user) {
         const itemsInCart = foodData.filter(item => item.Quantity > 0)
         for (const item of itemsInCart) {
-          await fetch(`/api/update-quantity/${item.FoodID}/`, {
+          await fetch(`/update-quantity/${item.FoodID}/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ quantity: -item.Quantity }),   // set to 0
           })
         }
       } else {
-        await fetch(`/api/session-cart/clear/${sessionId}/`, {
+        await fetch(`/session-cart/clear/${sessionId}/`, {
           method: 'DELETE',
         })
       }
@@ -147,18 +147,18 @@ export const GlobalStateProvider = ({ children }) => {
   // ── Transfer guest session cart → logged-in user ────────────────────────────
   const transferSessionCartToUser = useCallback(async () => {
     try {
-      const sessionRes = await fetch(`/api/session-cart/${sessionId}/`)
+      const sessionRes = await fetch(`/session-cart/${sessionId}/`)
       const sessionCart = await sessionRes.json()
 
       for (const item of sessionCart) {
-        await fetch(`/api/update-quantity/${item.food_id}/`, {
+        await fetch(`/update-quantity/${item.food_id}/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ quantity: item.quantity }),
         })
       }
 
-      await fetch(`/api/session-cart/clear/${sessionId}/`, {
+      await fetch(`/session-cart/clear/${sessionId}/`, {
         method: 'DELETE',
       })
     } catch (error) {
