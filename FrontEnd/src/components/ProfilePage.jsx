@@ -20,7 +20,7 @@ const ProfilePage = () => {
 
     const fetchUserOrders = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/orders/${user.user_id}/`)
+            const response = await fetch(`/api/orders/${user.user_id}/`)
             const data = await response.json()
             setOrders(data)
             setLoading(false)

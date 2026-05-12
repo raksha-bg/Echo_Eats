@@ -81,7 +81,7 @@ const VoiceAssistant = () => {
 
   const handleLogin = async (email, password) => {
     try {
-      const res = await fetch('http://localhost:3000/login/', {
+      const res = await fetch('/api/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -171,7 +171,7 @@ const VoiceAssistant = () => {
   const processVoiceCommand = useCallback(async (command) => {
     setIsProcessing(true);
     try {
-      const res = await fetch('http://localhost:3000/voice/', {
+      const res = await fetch('/api/voice/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcript: command }),

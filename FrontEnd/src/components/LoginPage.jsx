@@ -20,7 +20,7 @@ const LoginPage = () => {
 
     try {
       if (isLogin) {
-        const response = await fetch("http://localhost:3000/login/", {
+        const response = await fetch("/api/login/", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ const LoginPage = () => {
           setError(data.error)
         }
       } else {
-        const response = await fetch("http://localhost:3000/signup/", {
+        const response = await fetch("/api/signup/", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
