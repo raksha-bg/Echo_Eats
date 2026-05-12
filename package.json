@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "openai": "^6.37.0",
+    "razorpay": "^2.9.6",
+    "regenerator-runtime": "^0.14.1"
+  }
+}

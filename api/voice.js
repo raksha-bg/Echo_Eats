@@ -19,15 +19,29 @@ module.exports = async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful food ordering assistant for EchoEats. Always respond with valid JSON only. User can FILTER items, NAVIGATE to pages, ORDER items, or LOGOUT."
+          content: `You are the EchoEats voice assistant. You must ALWAYS return a JSON object.
+          The user can ask to:
+          1. Navigate to a page (Home, Cart, Orders, Login, Profile).
+          2. Filter food items (Pizza, Burger, Main Course, Snacks, Dessert).
+          3. Order/Add items to cart.
+          4. Logout.
+          
+          JSON Schema:
+          {
+            "response": "What you say to the user",
+            "command": "NAVIGATE | FILTER | ORDER | LOGOUT | NONE",
+            "page": "home | cart | orders | login | profile",
+            "category": "Pizza | Burger | Main Course | Snacks | Dessert",
+            "item_id": number (FoodID),
+            "quantity": number
+          }`
         },
         {
           role: "user",
-          content: `The user said: "${transcript}". Process this command and return JSON.`
+          content: transcript
         }
       ],
-      temperature: 0.7,
-      max_tokens: 500,
+      temperature: 0.1, // Keep it deterministic
       response_format: { type: "json_object" }
     });
 

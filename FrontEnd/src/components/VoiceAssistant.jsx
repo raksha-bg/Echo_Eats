@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
+import 'regenerator-runtime/runtime';
 import { useNavigate } from 'react-router-dom';
 import { GlobalStateContext } from '../context/GlobalStateContext';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
