@@ -1,0 +1,8 @@
+.env
+venv/
+venv_mac/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+db.sqlite3
