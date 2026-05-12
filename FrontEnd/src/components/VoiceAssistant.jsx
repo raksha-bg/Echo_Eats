@@ -92,7 +92,8 @@ const VoiceAssistant = () => {
         throw new Error('No AI response');
       }
     } catch (error) {
-      const errorMsg = 'Sorry, I had trouble processing that.';
+      console.error("Voice Fetch Error:", error);
+      const errorMsg = 'I had trouble connecting to the brain. Please check your internet or API key.';
       setAssistantResponse(errorMsg);
       speakResponse(errorMsg);
     } finally {

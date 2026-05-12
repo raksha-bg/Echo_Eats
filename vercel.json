@@ -11,11 +11,27 @@
     {
       "src": "api/index.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "api/voice.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/razorpay.js",
+      "use": "@vercel/node"
     }
   ],
   "rewrites": [
     {
-      "source": "/(food-items|voice|update-quantity|login|signup|logout|orders|create-order|verify-payment|user-orders|update-order-status|session-cart)(.*)",
+      "source": "/api/voice",
+      "destination": "/api/voice.js"
+    },
+    {
+      "source": "/api/razorpay",
+      "destination": "/api/razorpay.js"
+    },
+    {
+      "source": "/(food-items|update-quantity|login|signup|logout|orders|create-order|verify-payment|user-orders|update-order-status|session-cart)(.*)",
       "destination": "/api/index.py"
     },
     {
@@ -23,7 +39,7 @@
       "destination": "/api/index.py"
     },
     {
-      "source": "/((?!api/|food-items|voice|update-quantity|login|signup|logout|orders|create-order|verify-payment|user-orders|update-order-status|session-cart).*)",
+      "source": "/((?!api/|food-items|update-quantity|login|signup|logout|orders|create-order|verify-payment|user-orders|update-order-status|session-cart).*)",
       "destination": "/FrontEnd/$1"
     }
   ]
