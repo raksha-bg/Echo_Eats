@@ -151,3 +151,49 @@
     font-size: 14px;
     text-align: center;
 }
+
+.social-login {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    position: relative;
+}
+
+.social-login::before {
+    content: 'OR';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.google-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 50px;
+    border: 1px solid #e0e0e0;
+    background: white;
+    color: #555;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.google-button img {
+    width: 20px;
+    height: 20px;
+}
+
+.google-button:hover {
+    background-color: #fafafa;
+    border-color: #ccc;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}

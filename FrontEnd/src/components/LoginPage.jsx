@@ -85,6 +85,28 @@ const LoginPage = () => {
           {isLogin ? "Login" : "Sign Up"}
         </button>
 
+        <div className="social-login">
+          <button 
+            type="button" 
+            className="google-button"
+            onClick={async () => {
+              try {
+                const { GoogleAuthProvider, signInWithPopup } = await import('firebase/auth')
+                const { auth } = await import('../firebase')
+                const provider = new GoogleAuthProvider()
+                await signInWithPopup(auth, provider)
+                navigate(from, { replace: true })
+              } catch (error) {
+                console.error("Google login error:", error)
+                setError("Google sign-in failed. Please try again.")
+              }
+            }}
+          >
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+            Sign in with Google
+          </button>
+        </div>
+
         <p className="login-toggle">
           {isLogin ? "Don't have an account?" : "Already have an account?"}
           <span onClick={() => setIsLogin(!isLogin)}>
