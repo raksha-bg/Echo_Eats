@@ -5,4 +5,4 @@ node_modules/
 __pycache__/
 *.pyc
 .DS_Store
-db.sqlite3
+# db.sqlite3 (Enabled for Vercel demo)
