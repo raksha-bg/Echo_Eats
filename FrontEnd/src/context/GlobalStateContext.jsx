@@ -17,23 +17,33 @@ export const GlobalStateProvider = ({ children }) => {
   const [foodData, setFoodData] = useState([])
   const navigate = useNavigate()
 
-  // ── Derive cart totals from foodData instead of maintaining separate state ──
-  const syncCartState = useCallback((data) => {
-    const total = data.reduce((sum, item) => sum + (item.Quantity || 0), 0)
-    setQuantity(total)
-    setDisplayCart(total > 0)
-  }, [])
+  const SAMPLE_FOODS = [
+    { FoodID: 1, FoodName: 'Margherita Pizza', Price: 199, Category: 'Pizza', Quantity: 0, ImageName: '01_Margherita.jpeg' },
+    { FoodID: 2, FoodName: 'Farmhouse Pizza', Price: 249, Category: 'Pizza', Quantity: 0, ImageName: '02_Farmhouse.jpeg' },
+    { FoodID: 3, FoodName: 'Pepperoni Pizza', Price: 299, Category: 'Pizza', Quantity: 0, ImageName: '03_Pepperoni.jpeg' },
+    { FoodID: 4, FoodName: 'Veggie Burger', Price: 129, Category: 'Burger', Quantity: 0, ImageName: '04_VeggieBurger.jpeg' },
+    { FoodID: 5, FoodName: 'Chicken Burger', Price: 179, Category: 'Burger', Quantity: 0, ImageName: '05_ChickenBurger.jpeg' },
+    { FoodID: 6, FoodName: 'Cheese Burger', Price: 149, Category: 'Burger', Quantity: 0, ImageName: '06_CheeseBurger.jpeg' },
+    { FoodID: 7, FoodName: 'Chicken Biryani', Price: 299, Category: 'Main Course', Quantity: 0, ImageName: '07_ChickenBiryani.jpeg' },
+    { FoodID: 8, FoodName: 'North Indian Thali', Price: 349, Category: 'Main Course', Quantity: 0, ImageName: '08_Thali.jpeg' },
+    { FoodID: 9, FoodName: 'Masala Dosa', Price: 89, Category: 'Snacks', Quantity: 0, ImageName: '09_MasalaDosa.jpeg' },
+    { FoodID: 10, FoodName: 'Obbattu', Price: 49, Category: 'Dessert', Quantity: 0, ImageName: '10_Obbattu.jpeg' },
+    { FoodID: 11, FoodName: 'Vangi Bath', Price: 79, Category: 'Main Course', Quantity: 0, ImageName: '11_VangiBath.jpeg' },
+  ]
 
-  // ── Fetch food items once on mount ──────────────────────────────────────────
+  // ── Fetch food items ──────────────────────────────────────────────────────────
   const fetchFoodData = useCallback(async () => {
-    try {
-      const res = await fetch('/food-items/')
-      const data = await res.json()
-      setFoodData(data)
-      syncCartState(data)
-    } catch (error) {
-      console.error('Error fetching food data:', error)
+    // If not logged in, don't show any food items (as requested)
+    if (!localStorage.getItem('isLoggedIn') || localStorage.getItem('isLoggedIn') === 'false') {
+      setFoodData([])
+      setQuantity(0)
+      setDisplayCart(false)
+      return
     }
+
+    // Use hardcoded items for stability instead of Django
+    setFoodData(SAMPLE_FOODS)
+    syncCartState(SAMPLE_FOODS)
   }, [syncCartState])
 
   // ── Firebase Auth Listener + Session Setup ──────────────────────────────────
@@ -58,22 +68,22 @@ export const GlobalStateProvider = ({ children }) => {
         setIsLoggedIn(true)
         localStorage.setItem('user', JSON.stringify(userData))
         localStorage.setItem('isLoggedIn', 'true')
+        fetchFoodData() // Load items after login
       } else {
         setUser(null)
         setIsLoggedIn(false)
+        setFoodData([]) // Clear items on logout
         localStorage.removeItem('user')
         localStorage.setItem('isLoggedIn', 'false')
       }
       setLoading(false)
-      fetchFoodData()
     })
 
     return () => unsubscribe()
   }, [fetchFoodData])
 
-  // ── Update quantity — optimistic local update, one API call ─────────────────
+  // ── Update quantity — local only (using Firestore for real orders later) ─────
   const updateQuantity = useCallback(async (foodId, delta) => {
-    // 1. Optimistically update local state so UI responds instantly
     setFoodData(prev => {
       const updated = prev.map(item => {
         if (item.FoodID !== foodId) return item
@@ -82,67 +92,14 @@ export const GlobalStateProvider = ({ children }) => {
       syncCartState(updated)
       return updated
     })
-
-    // 2. Persist to backend
-    try {
-      let response
-
-      if (isLoggedIn && user) {
-        response = await fetch(`/update-quantity/${foodId}/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ quantity: delta }),
-        })
-      } else {
-        // Session cart: read current local quantity instead of fetching again
-        const currentItem = foodData.find(item => item.FoodID === foodId)
-        const currentQty = currentItem?.Quantity || 0
-        const newQuantity = Math.max(0, currentQty + delta)
-
-        response = await fetch('/session-cart/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, foodId, quantity: newQuantity }),
-        })
-      }
-
-      if (!response.ok) {
-        // Roll back optimistic update if backend rejected it
-        console.error('Backend rejected quantity update — rolling back')
-        fetchFoodData()
-      }
-    } catch (error) {
-      console.error('Error updating quantity:', error)
-      fetchFoodData()   // re-sync on network error
-    }
-  }, [isLoggedIn, user, sessionId, foodData, syncCartState, fetchFoodData])
+  }, [syncCartState])
 
   // ── Clear cart ──────────────────────────────────────────────────────────────
   const clearCart = useCallback(async () => {
-    try {
-      if (isLoggedIn && user) {
-        const itemsInCart = foodData.filter(item => item.Quantity > 0)
-        for (const item of itemsInCart) {
-          await fetch(`/update-quantity/${item.FoodID}/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ quantity: -item.Quantity }),   // set to 0
-          })
-        }
-      } else {
-        await fetch(`/session-cart/clear/${sessionId}/`, {
-          method: 'DELETE',
-        })
-      }
-
-      // Clear locally
-      setFoodData(prev => prev.map(item => ({ ...item, Quantity: 0 })))
-      setQuantity(0)
-      setDisplayCart(false)
-    } catch (error) {
-      console.error('Error clearing cart:', error)
-    }
-  }, [isLoggedIn, user, sessionId, foodData])
+    setFoodData(prev => prev.map(item => ({ ...item, Quantity: 0 })))
+    setQuantity(0)
+    setDisplayCart(false)
+  }, [])
 
   // ── Transfer guest session cart → logged-in user ────────────────────────────
   const transferSessionCartToUser = useCallback(async () => {

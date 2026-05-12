@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDcR0n1_giJmXQg97fFI-QemSYC1HN0NWY",
@@ -14,8 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-// Analytics is optional and can cause issues in serverless if not handled correctly
-// but I will export it just in case.
+export const db = getFirestore(app);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
 export default app;

@@ -21,20 +21,27 @@ const OrdersPage = () => {
 
     const fetchOrders = async () => {
         try {
-            const response = await fetch(`/orders/${user.user_id}/`)
-            const data = await response.json()
-            
-            // Ensure data is an array
-            if (Array.isArray(data)) {
-                setOrders(data)
-            } else if (data && data.success === false) {
-                console.error("Error from server:", data.error)
-                setOrders([])
-            } else {
-                console.error("Unexpected response format:", data)
-                setOrders([])
-            }
-            
+            const { collection, query, where, getDocs, orderBy } = await import('firebase/firestore')
+            const { db } = await import('../firebase')
+
+            const q = query(
+                collection(db, 'orders'),
+                where('userId', '==', user.user_id),
+                orderBy('createdAt', 'desc')
+            )
+
+            const querySnapshot = await getDocs(q)
+            const ordersData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                // Map Firestore fields to match original component expectations
+                order_date: doc.data().createdAt?.toDate() || new Date(),
+                total_amount: doc.data().amount,
+                order_status: doc.data().status,
+                payment_method: doc.data().paymentMethod
+            }))
+
+            setOrders(ordersData)
             setLoading(false)
         } catch (error) {
             console.error("Error fetching orders:", error)
