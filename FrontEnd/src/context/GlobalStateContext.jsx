@@ -27,7 +27,7 @@ export const GlobalStateProvider = ({ children }) => {
   // ── Fetch food items once on mount ──────────────────────────────────────────
   const fetchFoodData = useCallback(async () => {
     try {
-      const res = await fetch('/')
+      const res = await fetch('/food-items/')
       const data = await res.json()
       setFoodData(data)
       syncCartState(data)

@@ -23,13 +23,13 @@ const LoginPage = () => {
         const { signInWithEmailAndPassword } = await import('firebase/auth')
         const { auth } = await import('../firebase')
         await signInWithEmailAndPassword(auth, email, password)
-        navigate(from, { replace: true })
+        navigate('/', { replace: true })
       } else {
         const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth')
         const { auth } = await import('../firebase')
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
         await updateProfile(userCredential.user, { displayName: name })
-        navigate(from, { replace: true })
+        navigate('/', { replace: true })
       }
     } catch (error) {
       console.error("Auth error:", error)
