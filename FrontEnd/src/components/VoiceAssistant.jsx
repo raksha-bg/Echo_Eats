@@ -112,10 +112,23 @@ const VoiceAssistant = () => {
     return null;
   }
 
-  const startAssistant = () => {
-    resetTranscript();
-    setAssistantResponse('Listening...');
-    SpeechRecognition.startListening({ continuous: false, language: 'en-IN' });
+  const startAssistant = async () => {
+    try {
+      // Clear any existing speech
+      window.speechSynthesis?.cancel();
+      resetTranscript();
+      setAssistantResponse('Listening...');
+      
+      // Attempt to start listening
+      await SpeechRecognition.startListening({ 
+        continuous: false, 
+        language: 'en-IN' 
+      });
+    } catch (err) {
+      console.error("Mic Error:", err);
+      setAssistantResponse("Microphone access denied or not available. Please check settings.");
+      speakResponse("Microphone access denied. Please allow microphone access.");
+    }
   };
 
   if (!Togg) {
