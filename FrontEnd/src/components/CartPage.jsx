@@ -184,9 +184,6 @@ const CartPage = () => {
                         }, 3000)
 
                         navigate('/orders')
-                    } else {
-                        throw new Error(verifyData.error || "Payment verification failed")
-                    }
                 } catch (error) {
                     console.error("Verification error:", error)
                     alert("Payment verification failed: " + error.message)
